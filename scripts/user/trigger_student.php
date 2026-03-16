@@ -29,33 +29,25 @@ If the student name is left empty, the trigger automatically sets it to
 </form>
 
 <?php
-require_once __DIR__ . "/../db_config.php";
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $conn = db_connect();
+    $conn = new mysqli("localhost", "root", "", "cs306_phase2", 3307);
 
-    $student_id = $_POST["student_id"];
-    $name       = $_POST["name"];
-    $email      = $_POST["email"];
-    $department = $_POST["department"];
-
-    $stmt = $conn->prepare(
-        "INSERT INTO student (student_id, name, email, department)
-         VALUES (?, ?, ?, ?)"
-    );
-
-    if ($stmt) {
-        $stmt->bind_param("ssss", $student_id, $name, $email, $department);
-        $ok = $stmt->execute();
-        $stmt->close();
-    } else {
-        $ok = false;
+    if ($conn->connect_error) {
+        die("Connection failed");
     }
 
-    if ($ok) {
+    $student_id = $_POST["student_id"];
+    $name = $_POST["name"];
+    $email = $_POST["email"];
+    $department = $_POST["department"];
+
+    $sql = "INSERT INTO student (student_id, name, email, department)
+            VALUES ('$student_id', '$name', '$email', '$department')";
+
+    if ($conn->query($sql)) {
         echo "<p><b>Student inserted.</b> If name was empty, trigger set it to 'Unknown'.</p>";
     } else {
-        echo "<p>Error: " . htmlspecialchars($conn->error) . "</p>";
+        echo "<p>Error: " . $conn->error . "</p>";
     }
 
     $conn->close();

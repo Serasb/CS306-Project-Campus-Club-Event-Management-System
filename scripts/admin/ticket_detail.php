@@ -1,7 +1,6 @@
 <?php
-require_once __DIR__ . "/../db_config.php";
-
-$mysqli = db_connect();
+$mysqli = new mysqli("localhost", "root", "", "cs306_phase2", 3307);
+if ($mysqli->connect_error) { die("DB Error"); }
 
 $id = $_GET["id"] ?? null;
 if (!$id) { die("Invalid ticket."); }

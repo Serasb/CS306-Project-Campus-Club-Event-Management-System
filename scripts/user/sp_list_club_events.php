@@ -20,29 +20,16 @@ all events of a given club.
 </form>
 
 <?php
-require_once __DIR__ . "/../db_config.php";
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $conn = db_connect();
+    $conn = new mysqli("localhost", "root", "", "cs306_phase2", 3307);
 
-    $club_id_raw = $_POST["club_id"];
-    // If the ID is numeric, this keeps behavior but avoids injection.
-    $club_id = (int)$club_id_raw;
-
-    $stmt = $conn->prepare("CALL list_club_events(?)");
-
-    if ($stmt) {
-        $stmt->bind_param("i", $club_id);
-        $ok = $stmt->execute();
-
-        if ($ok) {
-            $result = $stmt->get_result();
-        } else {
-            $result = false;
-        }
-    } else {
-        $result = false;
+    if ($conn->connect_error) {
+        die("Connection failed");
     }
+
+    $club_id = $_POST["club_id"];
+
+    $result = $conn->query("CALL list_club_events('$club_id')");
 
     if ($result) {
         echo "<h3>Results:</h3>";
@@ -54,16 +41,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<td>{$row['e_id']}</td>";
             echo "<td>{$row['e_name']}</td>";
             echo "<td>{$row['e_date']}</td>";
-            echo "<td>{$row['e_time']}</td>";
+            echo "<td>" . ($row['time'] ?? $row['e_time'] ?? '-') . "</td>";
             echo "<td>{$row['v_name']}</td>";
             echo "</tr>";
         }
 
         echo "</table>";
-    }
-
-    if (isset($stmt) && $stmt) {
-        $stmt->close();
     }
 
     $conn->close();

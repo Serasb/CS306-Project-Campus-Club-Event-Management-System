@@ -1,7 +1,15 @@
 <?php
-require_once __DIR__ . "/../db_config.php";
+$mysqli = new mysqli(
+    "127.0.0.1",
+    "root",
+    "",
+    "cs306_phase2",
+    3307
+);
 
-$mysqli = db_connect();
+if ($mysqli->connect_error) {
+    die("DB Error");
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = $_POST["username"];

@@ -25,29 +25,21 @@ Registers a student to an event using a stored procedure.
 </form>
 
 <?php
-require_once __DIR__ . "/../db_config.php";
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $conn = db_connect();
+    $conn = new mysqli("localhost", "root", "", "cs306_phase2", 3307);
 
-    $student_id = $_POST["student_id"];
-    $event_id   = $_POST["event_id"];
-    $r_date     = $_POST["r_date"];
-
-    $stmt = $conn->prepare("CALL register_student_to_event(?, ?, ?)");
-
-    if ($stmt) {
-        $stmt->bind_param("sss", $student_id, $event_id, $r_date);
-        $ok = $stmt->execute();
-        $stmt->close();
-    } else {
-        $ok = false;
+    if ($conn->connect_error) {
+        die("Connection failed");
     }
 
-    if ($ok) {
+    $student_id = $_POST["student_id"];
+    $event_id = $_POST["event_id"];
+    $r_date = $_POST["r_date"];
+
+    if ($conn->query("CALL register_student_to_event('$student_id', '$event_id', '$r_date')")) {
         echo "<p><b>Student successfully registered.</b></p>";
     } else {
-        echo "<p>Error: " . htmlspecialchars($conn->error) . "</p>";
+        echo "<p>Error: " . $conn->error . "</p>";
     }
 
     $conn->close();

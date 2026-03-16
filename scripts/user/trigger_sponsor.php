@@ -26,35 +26,24 @@ If a negative budget is entered, the trigger automatically sets it to 0.
 </form>
 
 <?php
-require_once __DIR__ . "/../db_config.php";
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $conn = db_connect();
+    $conn = new mysqli("localhost", "root", "", "cs306_phase2", 3307);
 
-    $sp_id   = $_POST["sp_id"];
-    $sp_name = $_POST["sp_name"];
-    $budget  = $_POST["budget"];
-
-    // Cast budget to float to match numeric column usage.
-    $budget_float = (float)$budget;
-
-    $stmt = $conn->prepare(
-        "INSERT INTO sponsor (sp_id, sp_name, budget)
-         VALUES (?, ?, ?)"
-    );
-
-    if ($stmt) {
-        $stmt->bind_param("ssd", $sp_id, $sp_name, $budget_float);
-        $ok = $stmt->execute();
-        $stmt->close();
-    } else {
-        $ok = false;
+    if ($conn->connect_error) {
+        die("Connection failed");
     }
 
-    if ($ok) {
+    $sp_id = $_POST["sp_id"];
+    $sp_name = $_POST["sp_name"];
+    $budget = $_POST["budget"];
+
+    $sql = "INSERT INTO sponsor (sp_id, sp_name, budget)
+            VALUES ('$sp_id', '$sp_name', $budget)";
+
+    if ($conn->query($sql)) {
         echo "<p><b>Insert successful.</b> Check the database to see trigger effect.</p>";
     } else {
-        echo "<p>Error: " . htmlspecialchars($conn->error) . "</p>";
+        echo "<p>Error: " . $conn->error . "</p>";
     }
 
     $conn->close();
